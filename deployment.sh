@@ -4,22 +4,24 @@
 AWS_REGION="us-east-1"
 AWS_ACCOUNT_ID="986822852724"
 REPO_NAME="lambda-s3-processor"
-IMAGE_TAG="v0.9"
+IMAGE_TAG="v0.10"
 LAMBDA_FUNCTION_NAME="doc-pinecone-handler"
 
 # Your Pinecone credentials
-PINECONE_API_KEY="your-pinecone-api-key"
-PINECONE_INDEX_NAME="your-index-name"
-OPENAI_API_KEY="your-openai-api-key"  # if using OpenAI
+# PINECONE_API_KEY=""
+# PINECONE_INDEX_NAME="company-doc"
+# OPENAI_API_KEY=""
 
 echo "Building and pushing Docker image..."
 aws ecr get-login-password --region ${AWS_REGION} | \
     docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
-docker buildx build \
-    --platform linux/amd64 \
-    -t ${REPO_NAME}:${IMAGE_TAG} \
-    .
+# docker buildx build \
+#     --platform linux/amd64 \
+#     -t ${REPO_NAME}:${IMAGE_TAG} \
+#     .
+
+docker build -t ${REPO_NAME}:${IMAGE_TAG} .
 
 docker tag ${REPO_NAME}:${IMAGE_TAG} \
     ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${IMAGE_TAG}

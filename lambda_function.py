@@ -105,8 +105,6 @@ def get_embedding(text):
 
 
 def lambda_handler(event, context):
-    start_time = time.time()
-    print(f"=== Lambda started at {start_time} ===")
     print(f"Received {len(event['Records'])} messages from SQS")
 
     # print full event for debugging
@@ -117,21 +115,17 @@ def lambda_handler(event, context):
     processed_count = 0
 
     for idx, sqs_record in enumerate(event['Records']):
-        record_start = time.time()
         print(f"\n--- Processing SQS record {idx + 1}/{len(event['Records'])} ---")
 
         s3_event = json.loads(sqs_record['body'])
 
         for s3_record in s3_event['Records']:
-            file_start = time.time()
-
             bucket_name = s3_record['s3']['bucket']['name']
             object_key = s3_record['s3']['object']['key']
             event_name = s3_record.get('eventName', 'Unknown')
 
             print(f"Event: {event_name}")
             print(f"File: s3://{bucket_name}/{object_key}")
-            print(f"Time remaining: {context.get_remaining_time_in_millis() / 1000}s")
 
             # Skip delete events
             if 'Delete' in event_name:
@@ -155,7 +149,6 @@ def lambda_handler(event, context):
                     continue
 
                 # Read file from S3
-                read_start = time.time()
                 print(f"Reading from S3...")
                 response = s3_client.get_object(
                     Bucket=bucket_name,
@@ -163,9 +156,8 @@ def lambda_handler(event, context):
                 )
 
                 file_content = response['Body'].read()
-                read_time = time.time() - read_start
                 # print(f"File size: {len(file_content)} bytes")
-                print(f"** Read {len(file_content)} bytes in {read_time:.2f}s")
+                print(f"** Read {len(file_content)} bytes")
 
                 # Skip empty files
                 if len(file_content) == 0:
@@ -173,11 +165,9 @@ def lambda_handler(event, context):
                     continue
 
                 # Extract text
-                extract_start = time.time()
                 print(f"Extracting text from {file_extension} file...")
                 text = extract_text(file_content, file_extension)
-                extract_time = time.time() - extract_start
-                print(f"** Extracted {len(text)} characters in {extract_time:.2f}s")
+                print(f"** Extracted {len(text)} characters")
                 print(f"Preview: {text[:200]}...")
 
                 if not text or len(text.strip()) == 0:
@@ -185,14 +175,11 @@ def lambda_handler(event, context):
                     continue
 
                 # Chunk text
-                chunk_start = time.time()
                 print(f"Chunking text...")
                 chunks = chunk_text(text, chunk_size=1000, overlap=200)
-                chunk_time = time.time() - chunk_start
-                print(f"** Created {len(chunks)} chunks in {chunk_time:.2f}s")
+                print(f"** Created {len(chunks)} chunks")
 
                 # Prepare vectors for Pinecone
-                vector_start = time.time()
                 print(f"Preparing vectors...")
                 vectors = []
                 for i, chunk in enumerate(chunks):
@@ -213,17 +200,14 @@ def lambda_handler(event, context):
                         }
                     })
 
-                vector_time = time.time() - vector_start
-                print(f"✓ Prepared {len(vectors)} vectors in {vector_time:.2f}s")
+                print(f"✓ Prepared {len(vectors)} vectors")
 
                 # Upsert to Pinecone
-                print(f"Time remaining before Pinecone: {context.get_remaining_time_in_millis() / 1000}s")
-                pinecone_start = time.time()
                 print(f"Uploading {len(vectors)} vectors to Pinecone...")
                 try:
                     pc_index.upsert(vectors=vectors)
-                    pinecone_time = time.time() - pinecone_start
-                    print(f"** Uploaded to Pinecone in {pinecone_time:.2f}s")
+
+                    print(f"** Uploaded to Pinecone")
                 except Exception as pinecone_error:
                     print(f"ERROR uploading to Pinecone: {str(pinecone_error)}")
                     import traceback
@@ -238,12 +222,9 @@ def lambda_handler(event, context):
                 traceback.print_exc()
                 raise
 
-            record_time = time.time() - record_start
-            print(f"** Record processed in {record_time:.2f}s")
-            print(f"Time remaining: {context.get_remaining_time_in_millis() / 1000}s")
+            print(f"** Record processed")
 
-        total_time = time.time() - start_time
-        print(f"\n=== Lambda completed in {total_time:.2f}s ===")
+        print(f"\n=== Lambda completed ===")
 
     return {
         'statusCode': 200,

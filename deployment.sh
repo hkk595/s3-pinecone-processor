@@ -2,7 +2,7 @@
 
 # Configuration
 AWS_REGION="us-east-1"
-AWS_ACCOUNT_ID="986822852724"
+AWS_ACCOUNT_ID=""
 REPO_NAME="lambda-s3-processor"
 IMAGE_TAG="v0.10"
 LAMBDA_FUNCTION_NAME="doc-pinecone-handler"

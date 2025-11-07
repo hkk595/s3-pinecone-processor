@@ -194,7 +194,7 @@ def lambda_handler(event, context):
                         'metadata': {
                             'source': f"s3://{bucket_name}/{object_key}",
                             'chunk_index': i,
-                            'text': chunk[:1000],  # Store first 1000 chars in metadata
+                            'text': chunk,  # Store the original text in metadata for RAG
                             'file_type': file_extension,
                             'total_chunks': len(chunks)
                         }

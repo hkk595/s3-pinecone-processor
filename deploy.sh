@@ -5,7 +5,7 @@
 # AWS
 AWS_REGION="us-east-1"
 AWS_ACCOUNT_ID=""
-REPO_NAME="rag-app-repo"
+REPO_NAME="s3-pinecone-processor"
 IMAGE_TAG="${1:-latest}"
 LAMBDA_FUNCTION_NAME="doc-pinecone-handler"
 

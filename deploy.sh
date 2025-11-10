@@ -4,9 +4,9 @@
 
 # AWS
 AWS_REGION="us-east-1"
-AWS_ACCOUNT_ID=""
-REPO_NAME="lambda-s3-processor"
-IMAGE_TAG="v0.10"
+AWS_ACCOUNT_ID="986822852724"
+REPO_NAME="rag-app-repo"
+IMAGE_TAG="${1:-latest}"
 LAMBDA_FUNCTION_NAME="doc-pinecone-handler"
 
 # Construct the full ECR repository URI
@@ -43,19 +43,19 @@ echo "4. Pushing the image to ECR..."
 docker push ${ECR_REPO_URI}:${IMAGE_TAG}
 echo "Successfully pushed ${ECR_REPO_URI}:${IMAGE_TAG}"
 
-echo "5. Updating Lambda function..."
-aws lambda update-function-code \
-    --function-name ${LAMBDA_FUNCTION_NAME} \
-    --image-uri ${ECR_REPO_URI}:${IMAGE_TAG}
-
-echo "Waiting for update..."
-aws lambda wait function-updated --function-name ${LAMBDA_FUNCTION_NAME}
-
-echo "Setting environment variables..."
-aws lambda update-function-configuration \
-    --function-name ${LAMBDA_FUNCTION_NAME} \
-    --environment "Variables={PINECONE_API_KEY=${PINECONE_API_KEY},PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME},OPENAI_API_KEY=${OPENAI_API_KEY}}" \
-    --timeout 300 \
-    --memory-size 1024
-
-echo "Lambda function update complete."
+#echo "5. Updating Lambda function..."
+#aws lambda update-function-code \
+#    --function-name ${LAMBDA_FUNCTION_NAME} \
+#    --image-uri ${ECR_REPO_URI}:${IMAGE_TAG}
+#
+#echo "Waiting for update..."
+#aws lambda wait function-updated --function-name ${LAMBDA_FUNCTION_NAME}
+#
+#echo "Setting environment variables..."
+#aws lambda update-function-configuration \
+#    --function-name ${LAMBDA_FUNCTION_NAME} \
+#    --environment "Variables={PINECONE_API_KEY=${PINECONE_API_KEY},PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME},OPENAI_API_KEY=${OPENAI_API_KEY}}" \
+#    --timeout 300 \
+#    --memory-size 1024
+#
+#echo "Lambda function update complete."
